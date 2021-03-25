@@ -2,8 +2,9 @@ package evgen_Tantsura.currencyExchange.controller;
 
 import evgen_Tantsura.currencyExchange.repository.DealRepository;
 import evgen_Tantsura.currencyExchange.repository.ExchangeRatesRepository;
+import evgen_Tantsura.currencyExchange.utils.CONST;
 import evgen_Tantsura.currencyExchange.utils.ReceivingCourses;
-import evgen_Tantsura.currencyExchange.utils.WorkWithApplication;
+import evgen_Tantsura.currencyExchange.utils.WorkWithDeal;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,7 @@ import java.util.Map;
 public class MyController {
 
     ReceivingCourses receivingCourses = new ReceivingCourses();
-    WorkWithApplication workWithApplication = new WorkWithApplication();
+    WorkWithDeal workWithDeal = new WorkWithDeal();
 
     @Autowired
     ExchangeRatesRepository exchangeRatesRepository;
@@ -27,27 +28,48 @@ public class MyController {
     @Autowired
     DealRepository dealRepository;
 
-    @GetMapping("/startWork")
+    @GetMapping("/openingDay")
     public String requestCurrencyExchange() throws IOException, JSONException {
         receivingCourses.getCurrencyRates(exchangeRatesRepository, receivingCourses.processingJSON());
         return receivingCourses.getTextCurrencyRates(exchangeRatesRepository);
     }
 
-    @GetMapping("/application")
-    public String requestCurrencyPurchase(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException {
-        return workWithApplication.savingTheApplication(dealRepository, exchangeRatesRepository, reguestMap);
+    @GetMapping("/request")
+    public String requestCurrencyDeal(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException {
+        return workWithDeal.saveTheDeal(dealRepository, exchangeRatesRepository, reguestMap);
     }
 
-    @GetMapping("/confirmation")
-    public String responseCurrencyPurchase(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException {
-        String otpPassClient = reguestMap.get("otpPass");
-        String tel = reguestMap.get("tel");
-        Map<String, String> stringObjectMap = dealRepository.checkStatus(tel, otpPassClient);
-
-        if (!stringObjectMap.isEmpty()) {
-            workWithApplication.updateTheApplication(dealRepository, reguestMap);
+    @GetMapping("/response")
+    public String responseCurrencyDeal(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException {
+        String otpPassClient = reguestMap.get(CONST.OTP_PASS);
+        String tel = reguestMap.get(CONST.TEL);
+        Map<String, String> checkStatusMap = dealRepository.checkStatus(tel, otpPassClient);
+        String resultCheckOTP = null;
+        if (!checkStatusMap.isEmpty()) {
+            workWithDeal.updateTheDeal(dealRepository, reguestMap);
+            resultCheckOTP = CONST.ORDER_OK;
+        } else {
+            workWithDeal.cancellationTheDeal(dealRepository, reguestMap);
+            resultCheckOTP = CONST.ORDER_NOT_OK;
         }
-        return "Покупка успешно выполнена";
+        return resultCheckOTP;
     }
 
+    @GetMapping("/delete")
+    public String deleteDeal(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException {
+        String response = null;
+
+        if (workWithDeal.checkForRemove(dealRepository, reguestMap)) {
+            workWithDeal.removeTheDeal(dealRepository, reguestMap);
+            response = "Заявка №: " + reguestMap.get(CONST.ID) + " - удалена";
+        } else
+            response = "Заявка не удалена. Проверьте параметры!";
+        return response;
+    }
+
+    @GetMapping("/closingDay")
+    public String closing() throws IOException, JSONException {
+        String reportCount = workWithDeal.countTransactionsByCurrency(dealRepository);
+        return reportCount;
+    }
 }

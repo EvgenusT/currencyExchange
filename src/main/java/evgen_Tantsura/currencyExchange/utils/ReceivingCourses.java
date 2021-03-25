@@ -22,8 +22,7 @@ public class ReceivingCourses {
     public static final BigDecimal margin = new BigDecimal(0.0500);
 
     public List<Map<String, String>> processingJSON() throws MalformedURLException, JSONException {
-        URL startURL = new URL("https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5");
-        String json_source = getStringRates(startURL);
+        String json_source = getStringRates(new URL(CONST.URL_API));
         JSONArray jsonArr = new JSONArray(json_source);
         JSONObject jsonObject;
         List<Map<String, String>> listRatesInJson = new ArrayList<>();
@@ -63,10 +62,10 @@ public class ReceivingCourses {
         ExchangeRates newExchangeRates = null;
         for (int i = 0; i < listJson.size(); i++) {
             Map<String, String> stringMap = listJson.get(i);
-            BigDecimal buy = new BigDecimal(stringMap.get("buy"));
-            BigDecimal sale = new BigDecimal(stringMap.get("sale"));
-            newExchangeRates = new ExchangeRates(stringMap.get("ccy"),
-                    stringMap.get("base_ccy"), stringMap.get("buy"), stringMap.get("sale"), LocalDateTime.now(),
+            BigDecimal buy = new BigDecimal(stringMap.get(CONST.BUY));
+            BigDecimal sale = new BigDecimal(stringMap.get(CONST.SALE));
+            newExchangeRates = new ExchangeRates(stringMap.get(CONST.CCY),
+                    stringMap.get(CONST.BASE_CCY), stringMap.get(CONST.BUY), stringMap.get(CONST.SALE), LocalDateTime.now(),
                     buy.multiply(margin).add(buy), sale.multiply(margin).add(sale));
             exchangeRatesRepository.save(newExchangeRates);
         }
@@ -78,8 +77,8 @@ public class ReceivingCourses {
         String request = "";
         for (int i = 0; i < current.size(); i++) {
             Map<String, Object> line = exchangeRatesRepository.getTheRateByCurrency(current.get(i));
-            request = "Курс: " + line.get("CCY") + " к " + line.get("BASE_CCY") + " по состоянию на: "
-                    + line.get("DATE_AND_TIME") + ": Продажа - " + line.get("MY_SALE") + " Покупка - " + line.get("MY_BUY") + " \n";
+            request = "Курс: " + line.get(CONST.CCY) + " к " + line.get(CONST.BASE_CCY) + " по состоянию на: "
+                    + line.get(CONST.DATE_AND_TIME) + ": Продажа - " + line.get(CONST.MY_SALE) + " Покупка - " + line.get(CONST.MY_BUY) + " \n";
             sb.append(request);
         }
         request = sb.toString();

@@ -26,16 +26,18 @@ public class Deal {
     @Column(scale = 4, precision = 19)
     private BigDecimal sumDealInUah;
     private LocalDateTime dateDeal;
+    private String typeOfOperation;
     private String otpPass;
 
     public Deal(String tel, String status, BigDecimal sumDeal, String currency, BigDecimal sumDealInUah,
-                LocalDateTime dateDeal, String otpPass) {
+                LocalDateTime dateDeal, String typeOfOperation, String otpPass) {
         this.tel = tel;
         this.status = status;
         this.sumDeal = sumDeal;
         this.currency = currency;
         this.sumDealInUah = sumDealInUah;
         this.dateDeal = dateDeal;
+        this.typeOfOperation = typeOfOperation;
         this.otpPass = otpPass;
     }
 }

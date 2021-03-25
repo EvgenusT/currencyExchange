@@ -9,14 +9,14 @@ import java.util.Map;
 public interface ExchangeRatesRepository extends JpaRepository<ExchangeRates, Integer> {
 
     @Query(value = "SELECT MY_BUY FROM exchange_Rates WHERE id = " +
-            "(SELECT max(id) FROM exchange_Rates WHERE CCY = ?1 AND date_And_Time <= NOW())", nativeQuery = true)
+            "(SELECT max(id) FROM exchange_Rates WHERE CCY = ?1 AND date_And_Time >= CURDATE())", nativeQuery = true)
     public String getTheCurrencyPurchaseRate(String currency);
 
     @Query(value = "SELECT MY_SALE FROM exchange_Rates WHERE id = " +
-            "(SELECT max(id) FROM exchange_Rates WHERE CCY = ?1 AND date_And_Time <= NOW())", nativeQuery = true)
+            "(SELECT max(id) FROM exchange_Rates WHERE CCY = ?1 AND date_And_Time >= CURDATE())", nativeQuery = true)
     public String getTheCurrencySaleRate(String currency);
 
     @Query(value = "SELECT * FROM exchange_Rates WHERE id = " +
-            "(SELECT max(id) FROM exchange_Rates WHERE CCY = ?1 AND date_And_Time <= NOW())", nativeQuery = true)
+            "(SELECT max(id) FROM exchange_Rates WHERE CCY = ?1 AND date_And_Time >= CURDATE())", nativeQuery = true)
     public Map<String, Object> getTheRateByCurrency(String currency);
 }
