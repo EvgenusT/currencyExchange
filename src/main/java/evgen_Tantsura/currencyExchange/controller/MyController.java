@@ -1,5 +1,6 @@
 package evgen_Tantsura.currencyExchange.controller;
 
+import evgen_Tantsura.currencyExchange.entity.Deal;
 import evgen_Tantsura.currencyExchange.repository.DealRepository;
 import evgen_Tantsura.currencyExchange.repository.ExchangeRatesRepository;
 import evgen_Tantsura.currencyExchange.utils.CONST;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -69,7 +72,12 @@ public class MyController {
 
     @GetMapping("/closingDay")
     public String closing() throws IOException, JSONException {
-        String reportCount = workWithDeal.countTransactionsByCurrency(dealRepository);
-        return reportCount;
+        return workWithDeal.countTransactionsByCurrency(dealRepository);
+    }
+
+    @GetMapping("/report")
+    public List<Deal> reportForThePeriod(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException, ParseException {
+        List<Deal> report = workWithDeal.report(dealRepository, reguestMap);
+        return report;
     }
 }

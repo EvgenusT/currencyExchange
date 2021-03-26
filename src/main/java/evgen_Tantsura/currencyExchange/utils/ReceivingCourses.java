@@ -19,7 +19,7 @@ import java.util.*;
 
 public class ReceivingCourses {
 
-    public static final BigDecimal margin = new BigDecimal(0.0500);
+    public static final BigDecimal margin = new BigDecimal(0.00500);
 
     public List<Map<String, String>> processingJSON() throws MalformedURLException, JSONException {
         String json_source = getStringRates(new URL(CONST.URL_API));
@@ -66,7 +66,7 @@ public class ReceivingCourses {
             BigDecimal sale = new BigDecimal(stringMap.get(CONST.SALE));
             newExchangeRates = new ExchangeRates(stringMap.get(CONST.CCY),
                     stringMap.get(CONST.BASE_CCY), stringMap.get(CONST.BUY), stringMap.get(CONST.SALE), LocalDateTime.now(),
-                    buy.multiply(margin).add(buy), sale.multiply(margin).add(sale));
+                    buy.subtract(buy.multiply(margin)), sale.multiply(margin).add(sale));
             exchangeRatesRepository.save(newExchangeRates);
         }
     }

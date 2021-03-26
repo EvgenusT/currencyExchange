@@ -1,6 +1,7 @@
 package evgen_Tantsura.currencyExchange.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 
 @Entity(name = "exchange_Rates")
 @Data
+@NoArgsConstructor
 public class ExchangeRates {
 
     @Id

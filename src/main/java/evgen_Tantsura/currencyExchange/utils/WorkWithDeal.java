@@ -1,11 +1,14 @@
 package evgen_Tantsura.currencyExchange.utils;
 
 import evgen_Tantsura.currencyExchange.entity.Deal;
+import evgen_Tantsura.currencyExchange.entity.ExchangeRates;
 import evgen_Tantsura.currencyExchange.repository.DealRepository;
 import evgen_Tantsura.currencyExchange.repository.ExchangeRatesRepository;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -25,23 +28,28 @@ public class WorkWithDeal {
         String otpPassword = null;
 
         if (typeOfOperation.equals(CONST.SALE)) {
-            String theCurrencySaleRate = exchangeRatesRepository.getTheCurrencySaleRate(currency);
+            ExchangeRates exchangeRates = exchangeRatesRepository.getTheCurrencySaleRate(currency);
             BigDecimal sumInCurrency = new BigDecimal(sum);
-            BigDecimal sumInUAH = sumInCurrency.multiply(new BigDecimal(theCurrencySaleRate));
+            BigDecimal mySumInUAH = sumInCurrency.multiply(exchangeRates.getMySale());
+            BigDecimal sumInUAH = sumInCurrency.multiply(new BigDecimal(exchangeRates.getSale()));
+            BigDecimal income = mySumInUAH.subtract(sumInUAH);
             otpPassword = createOtpPassword();
 
-            Deal deal = new Deal(tel, CONST.NEW, sumInCurrency, currency, sumInUAH,
+            Deal deal = new Deal(tel, CONST.NEW, sumInCurrency, currency, mySumInUAH, income,
                     LocalDateTime.now(), typeOfOperation, otpPassword);
             dealRepository.save(deal);
 
         } else if (typeOfOperation.equals(CONST.BUY)
         ) {
-            String theCurrencyPurchaseRateRate = exchangeRatesRepository.getTheCurrencyPurchaseRate(currency);
+            ExchangeRates exchangeRates = exchangeRatesRepository.getTheCurrencyPurchaseRate(currency);
             BigDecimal sumInCurrency = new BigDecimal(sum);
-            BigDecimal sumInUAH = sumInCurrency.multiply(new BigDecimal(theCurrencyPurchaseRateRate));
+            BigDecimal mySumInUAH = sumInCurrency.multiply(exchangeRates.getMyBuy());
+            BigDecimal sumInUAH = sumInCurrency.multiply(new BigDecimal(exchangeRates.getBuy()));
+            BigDecimal income = sumInUAH.subtract(mySumInUAH);
+
             otpPassword = createOtpPassword();
 
-            Deal deal = new Deal(tel, CONST.NEW, sumInCurrency, currency, sumInUAH,
+            Deal deal = new Deal(tel, CONST.NEW, sumInCurrency, currency, mySumInUAH, income,
                     LocalDateTime.now(), typeOfOperation, otpPassword);
             dealRepository.save(deal);
         }
@@ -75,25 +83,39 @@ public class WorkWithDeal {
 
     public String countTransactionsByCurrency(DealRepository dealRepository) {
         List<String> current = Arrays.asList("USD", "EUR", "RUR", "BTC");
-        for (int i = 0; i < current.size(); i++) {
-            int count = dealRepository.countDeals(current.get(i), CONST.BUY);
-            BigDecimal sumDeals = dealRepository.sumDeals(current.get(i), CONST.BUY);
-            sb.append("Кількість угод з ПРИДБАННЯ, у валюті: " + current.get(i) + " = "
-                    + count + " на суму: " + sumDeals + "\n");
+        for (String value : current) {
+            int count = dealRepository.countDeals(value, CONST.BUY);
+            BigDecimal sumDeals = dealRepository.sumDeals(value, CONST.BUY);
+            sb.append("Кількість угод з ПРИДБАННЯ, у валюті: ").append(value).append(" = ").
+                    append(count).append(" на суму: ").append(sumDeals).append("\n");
         }
         sb.append("----------------------------\n");
-        for (int i = 0; i < current.size(); i++) {
-            int count = dealRepository.countDeals(current.get(i), CONST.SALE);
-            BigDecimal sumDeals = dealRepository.sumDeals(current.get(i), CONST.SALE);
-            sb.append("Кількість угод з ПРОДАЖУ, у валюті: " + current.get(i) + " = "
-                    + count + " на суму: " + sumDeals + "\n");
+        for (String s : current) {
+            int count = dealRepository.countDeals(s, CONST.SALE);
+            BigDecimal sumDeals = dealRepository.sumDeals(s, CONST.SALE);
+            sb.append("Кількість угод з ПРОДАЖУ, у валюті: ").append(s).append(" = ").
+                    append(count).append(" на суму: ").append(sumDeals).append("\n");
         }
         sb.append("----------------------------\n");
         request = sb.toString();
         return request;
     }
 
-    public String createOtpPassword() {
+    public List<Deal> report(DealRepository dealRepository, Map<String, String> reguestMap) throws ParseException {
+        String currency = reguestMap.get(CONST.CURRENCY);
+        LocalDateTime beginning = convertFormatDate(reguestMap.get(CONST.BEGINNING));
+        LocalDateTime end = convertFormatDate(reguestMap.get(CONST.END));
+        List<Deal> allByCurrencyAndPeriod = dealRepository.findAllByCurrencyAndPeriod(currency, beginning, end);
+        return allByCurrencyAndPeriod;
+    }
+
+    private LocalDateTime convertFormatDate(String date) throws ParseException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
+        return dateTime;
+    }
+
+    private String createOtpPassword() {
         Random randomOtp = new Random();
         int otp = randomOtp.nextInt(999999);
         return String.format("%06d", otp);

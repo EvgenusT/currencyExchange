@@ -19,6 +19,9 @@ public class CONST {
     public static final String MY_BUY = "MY_BUY";
     public static final String OTP_PASS = "otpPass";
     public static final String ID = "id";
+    public static final String BEGINNING = "beginning";
+    public static final String END = "end";
+
     public static final String TYPE_OF_OPERATION = "typeOfOperation";
 
     public static final String URL_API = "https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5";
