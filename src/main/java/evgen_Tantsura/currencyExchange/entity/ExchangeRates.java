@@ -3,10 +3,7 @@ package evgen_Tantsura.currencyExchange.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -16,7 +13,7 @@ import java.time.LocalDateTime;
 public class ExchangeRates {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue (strategy = GenerationType.TABLE)
     private int id;
     private String ccy;
     private String base_ccy;

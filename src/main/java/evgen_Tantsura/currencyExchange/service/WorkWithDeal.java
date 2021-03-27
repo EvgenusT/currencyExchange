@@ -1,9 +1,10 @@
-package evgen_Tantsura.currencyExchange.utils;
+package evgen_Tantsura.currencyExchange.service;
 
 import evgen_Tantsura.currencyExchange.entity.Deal;
 import evgen_Tantsura.currencyExchange.entity.ExchangeRates;
 import evgen_Tantsura.currencyExchange.repository.DealRepository;
 import evgen_Tantsura.currencyExchange.repository.ExchangeRatesRepository;
+import evgen_Tantsura.currencyExchange.utils.CONST;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -86,15 +87,29 @@ public class WorkWithDeal {
         for (String value : current) {
             int count = dealRepository.countDeals(value, CONST.BUY);
             BigDecimal sumDeals = dealRepository.sumDeals(value, CONST.BUY);
-            sb.append("Кількість угод з ПРИДБАННЯ, у валюті: ").append(value).append(" = ").
-                    append(count).append(" на суму: ").append(sumDeals).append("\n");
+            BigDecimal income = dealRepository.sumIncomForCurrency(value, CONST.BUY);
+            sb.append("Кількість угод з ПРИДБАННЯ, у валюті: ")
+                    .append(value).append(" = ")
+                    .append(count).append(" на суму: ")
+                    .append(sumDeals)
+                    .append("\t Прибуток складає: ")
+                    .append(income)
+                    .append(" грн.")
+                    .append("\n");
         }
         sb.append("----------------------------\n");
-        for (String s : current) {
-            int count = dealRepository.countDeals(s, CONST.SALE);
-            BigDecimal sumDeals = dealRepository.sumDeals(s, CONST.SALE);
-            sb.append("Кількість угод з ПРОДАЖУ, у валюті: ").append(s).append(" = ").
-                    append(count).append(" на суму: ").append(sumDeals).append("\n");
+        for (String value : current) {
+            int count = dealRepository.countDeals(value, CONST.SALE);
+            BigDecimal sumDeals = dealRepository.sumDeals(value, CONST.SALE);
+            BigDecimal income = dealRepository.sumIncomForCurrency(value, CONST.SALE);
+            sb.append("Кількість угод з ПРОДАЖУ, у валюті: ")
+                    .append(value).append(" = ")
+                    .append(count).append(" на суму: ")
+                    .append(sumDeals)
+                    .append("\t Прибуток складає: ")
+                    .append(income)
+                    .append(" грн.")
+                    .append("\n");
         }
         sb.append("----------------------------\n");
         request = sb.toString();

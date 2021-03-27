@@ -1,8 +1,9 @@
-package evgen_Tantsura.currencyExchange.utils;
+package evgen_Tantsura.currencyExchange.service;
 
 import com.google.gson.Gson;
 import evgen_Tantsura.currencyExchange.entity.ExchangeRates;
 import evgen_Tantsura.currencyExchange.repository.ExchangeRatesRepository;
+import evgen_Tantsura.currencyExchange.utils.CONST;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
