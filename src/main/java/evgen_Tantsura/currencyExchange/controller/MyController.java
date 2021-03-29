@@ -44,9 +44,7 @@ public class MyController {
 
     @GetMapping("/response")
     public String responseCurrencyDeal(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException {
-        String otpPassClient = reguestMap.get(CONST.OTP_PASS);
-        String tel = reguestMap.get(CONST.TEL);
-        Map<String, String> checkStatusMap = dealRepository.checkStatus(tel, otpPassClient);
+        Map<String, String> checkStatusMap = dealRepository.checkStatus(reguestMap.get(CONST.TEL), reguestMap.get(CONST.OTP_PASS));
         String resultCheckOTP = null;
         if (!checkStatusMap.isEmpty()) {
             workWithDeal.updateTheDeal(dealRepository, reguestMap);

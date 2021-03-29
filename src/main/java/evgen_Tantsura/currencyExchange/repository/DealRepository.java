@@ -47,7 +47,6 @@ public interface DealRepository extends JpaRepository<Deal, Integer> {
             "AND TYPE_OF_OPERATION  = ?2", nativeQuery = true)
     BigDecimal sumIncomForCurrency(String currency, String type);
 
-
     @Query(value = "SELECT * FROM Deal WHERE CURRENCY = ?1 AND DATE_DEAL >= ?2 AND DATE_DEAL <= ?3", nativeQuery = true)
     List<Deal> findAllByCurrencyAndPeriod(String currency, LocalDateTime beginning, LocalDateTime end);
 
