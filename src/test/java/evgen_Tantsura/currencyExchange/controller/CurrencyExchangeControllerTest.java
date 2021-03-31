@@ -1,22 +1,18 @@
 package evgen_Tantsura.currencyExchange.controller;
 
 import com.google.gson.Gson;
-import evgen_Tantsura.currencyExchange.entity.Deal;
 import evgen_Tantsura.currencyExchange.repository.DealRepository;
-import evgen_Tantsura.currencyExchange.utils.CONST;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,19 +27,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class MyControllerTest {
+class CurrencyExchangeControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private MyController myController;
+    private CurrencyExchangeController currencyExchangeController;
 
     @Autowired
     DealRepository dealRepository;
 
     @Test
     public void shouldControllerOk() throws Exception {
-        assertThat(myController).isNotNull();
+        assertThat(currencyExchangeController).isNotNull();
     }
 
     @Test
@@ -55,7 +51,7 @@ class MyControllerTest {
 
     @Test
     void shouldOkRequestCurrencyDeal() throws Exception {
-        myController.requestCurrencyExchange();
+        currencyExchangeController.requestCurrencyExchange();
         Gson gson = new Gson();
         Map<String, String> map = new HashMap<>();
         map.put("currency", "USD");
@@ -70,12 +66,8 @@ class MyControllerTest {
     }
 
     @Test
+    @Sql(value = {"/create-deal-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void shouldOkResponseCurrencyDeal() throws Exception {
-        Deal deal = new Deal("0504520366", CONST.NEW, new BigDecimal(100.0000),
-                "USD", new BigDecimal(10000.00000), new BigDecimal(10.00000),
-                LocalDateTime.now(), "buy", "111111");
-        dealRepository.save(deal);
-
         Gson gson = new Gson();
         Map<String, String> mapForTest = new HashMap<>();
         mapForTest.put("tel", "0504520366");
@@ -89,12 +81,8 @@ class MyControllerTest {
     }
 
     @Test
+    @Sql(value = {"/create-deal-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void shouldNotOkResponseCurrencyDeal() throws Exception {
-        Deal deal = new Deal("0504520366", CONST.NEW, new BigDecimal(100.0000),
-                "USD", new BigDecimal(10000.00000), new BigDecimal(10.00000),
-                LocalDateTime.now(), "buy", "111111");
-        dealRepository.save(deal);
-
         Gson gson = new Gson();
         Map<String, String> mapForTest = new HashMap<>();
         mapForTest.put("tel", "0504520366");
@@ -109,16 +97,12 @@ class MyControllerTest {
 
 
     @Test
+    @Sql(value = {"/create-deal-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void shouldOkDeleteDeal() throws Exception {
-        Deal deal = new Deal("0504520367", CONST.NEW, new BigDecimal(100.0000),
-                "USD", new BigDecimal(10000.00000), new BigDecimal(10.00000),
-                LocalDateTime.now(), "buy", "222222");
-        dealRepository.save(deal);
-
         Gson gson = new Gson();
         Map<String, String> mapForTest = new HashMap<>();
         mapForTest.put("id", "3");
-        mapForTest.put("tel", "0504520367");
+        mapForTest.put("tel", "0504520366");
         String json = gson.toJson(mapForTest);
 
         this.mockMvc.perform(get("/currencyExchange/delete").contentType(MediaType.APPLICATION_JSON).content(json))
@@ -128,12 +112,8 @@ class MyControllerTest {
     }
 
     @Test
+    @Sql(value = {"/create-deal-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void shouldNotOkDeleteDeal() throws Exception {
-        Deal deal = new Deal("0504520366", CONST.NEW, new BigDecimal(100.0000),
-                "USD", new BigDecimal(10000.00000), new BigDecimal(10.00000),
-                LocalDateTime.now(), "buy", "111111");
-        dealRepository.save(deal);
-
         Gson gson = new Gson();
         Map<String, String> mapForTest = new HashMap<>();
         mapForTest.put("id", "1");
@@ -155,12 +135,8 @@ class MyControllerTest {
     }
 
     @Test
+    @Sql(value = {"/create-deal-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void shouldReportForThePeriod() throws Exception {
-        Deal deal = new Deal("0504520366", CONST.NEW, new BigDecimal(100.0000),
-                "USD", new BigDecimal(10000.00000), new BigDecimal(10.00000),
-                LocalDateTime.now(), "buy", "111111");
-        dealRepository.save(deal);
-
         Gson gson = new Gson();
         Map<String, String> mapForTest = new HashMap<>();
         mapForTest.put("currency", "USD");

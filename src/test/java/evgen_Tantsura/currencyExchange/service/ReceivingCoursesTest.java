@@ -1,15 +1,17 @@
 package evgen_Tantsura.currencyExchange.service;
 
+import evgen_Tantsura.currencyExchange.repository.ExchangeRatesRepository;
+import evgen_Tantsura.currencyExchange.utils.CONST;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,9 @@ public class ReceivingCoursesTest {
 
     ReceivingCourses receivingCourses = new ReceivingCourses();
 
+    @Autowired
+    ExchangeRatesRepository exchangeRatesRepository;
+
     @Test
     public void shouldGetExternalServiceFromPrivat() throws MalformedURLException, JSONException {
         List<Map<String, String>> list = receivingCourses.processingJSON();
@@ -26,45 +31,28 @@ public class ReceivingCoursesTest {
     }
 
     @Test
-    public void shouldGetExternalServiceFromPrivatq() throws MalformedURLException, JSONException {
+    public void shouldParameterURLPrivat() {
+        String url = "https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5";
+        Assert.assertEquals(url, CONST.URL_API);
+    }
+
+    @Test
+    public void shouldGetTheNumberOfCurrencies() throws MalformedURLException, JSONException {
         List<Map<String, String>> list = receivingCourses.processingJSON();
-        List<Map<String, String>> listTo = new ArrayList<>();
-        Map<String, String> map = new HashMap<>();
-        map.put("ccy", "USD");
-        map.put("base_ccy", "UAH");
-        map.put("buy", "27.65000");
-        map.put("sale", "28.05000");
-        Map<String, String> map2 = new HashMap<>();
-        map2.put("ccy", "EUR");
-        map2.put("base_ccy", "UAH");
-        map2.put("buy", "32.50000");
-        map2.put("sale", "33.10000");
-        Map<String, String> map3 = new HashMap<>();
-        map3.put("ccy", "RUR");
-        map3.put("base_ccy", "UAH");
-        map3.put("buy", "0.36000");
-        map3.put("sale", "0.39000");
-        Map<String, String> map4 = new HashMap<>();
-        map4.put("ccy", "BTC");
-        map4.put("base_ccy", "USD");
-        map4.put("buy", "54884.9469");
-        map4.put("sale", "60662.3097");
-        listTo.add(map);
-        listTo.add(map2);
-        listTo.add(map3);
-        listTo.add(map4);
-        Assert.assertEquals(list, listTo);
+        Assert.assertEquals(list.size(), 4);
     }
 
     @Test
-    public void getStringRates() {
+    @Sql(value = {"/create-exchangeRates-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    public void shouldGetTextCurrencyRatesOk() throws MalformedURLException {
+        String stringRates = receivingCourses.getTextCurrencyRates(exchangeRatesRepository);
+
+        String s = "\n" + "Курс: USD к UAH по состоянию на: 2021-03-31 14:02:49.11672: Продажа - 28.0898 Покупка - 27.4122 \n" +
+                "Курс: EUR к UAH по состоянию на: 2021-03-31 14:02:49.196725: Продажа - 33.0143 Покупка - 32.0887 \n" +
+                "Курс: RUR к UAH по состоянию на: 2021-03-31 14:02:49.200727: Продажа - 0.3889 Покупка - 0.3552 \n" +
+                "Курс: BTC к USD по состоянию на: 2021-03-31 14:02:49.204728: Продажа - 61026.5123 Покупка - 54665.0658 " + "\n";
+        Assert.assertEquals(stringRates, s);
+
     }
 
-    @Test
-    public void getCurrencyRates() {
-    }
-
-    @Test
-    public void getTextCurrencyRates() {
-    }
 }

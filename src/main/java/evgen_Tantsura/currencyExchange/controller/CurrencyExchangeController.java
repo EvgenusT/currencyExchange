@@ -6,12 +6,11 @@ import evgen_Tantsura.currencyExchange.repository.ExchangeRatesRepository;
 import evgen_Tantsura.currencyExchange.utils.CONST;
 import evgen_Tantsura.currencyExchange.service.ReceivingCourses;
 import evgen_Tantsura.currencyExchange.service.WorkWithDeal;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -20,7 +19,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("currencyExchange")
-public class MyController {
+@Api(value = "CurrencyExchangeController", description = "Application that simulates the operation of a point for selling currencies")
+public class CurrencyExchangeController {
 
     ReceivingCourses receivingCourses = new ReceivingCourses();
     WorkWithDeal workWithDeal = new WorkWithDeal();
@@ -32,17 +32,20 @@ public class MyController {
     DealRepository dealRepository;
 
     @GetMapping("/openingDay")
+    @ApiOperation(value = "Открытие рабочегодня дня")
     public String requestCurrencyExchange() throws IOException, JSONException {
         receivingCourses.getCurrencyRates(exchangeRatesRepository, receivingCourses.processingJSON());
         return receivingCourses.getTextCurrencyRates(exchangeRatesRepository);
     }
 
-    @GetMapping("/request")
+    @PostMapping("/request")
+    @ApiOperation(value = "Заявка на продажу/покупку валюты от пользователя")
     public String requestCurrencyDeal(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException {
         return workWithDeal.saveTheDeal(dealRepository, exchangeRatesRepository, reguestMap);
     }
 
-    @GetMapping("/response")
+    @PostMapping("/response")
+    @ApiOperation(value = "Подтверждение заявки пользователем")
     public String responseCurrencyDeal(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException {
         Map<String, String> checkStatusMap = dealRepository.checkStatus(reguestMap.get(CONST.TEL), reguestMap.get(CONST.OTP_PASS));
         String resultCheckOTP = null;
@@ -56,7 +59,7 @@ public class MyController {
         return resultCheckOTP;
     }
 
-    @GetMapping("/delete")
+    @PostMapping("/delete")
     public String deleteDeal(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException {
         String response = null;
 
