@@ -22,13 +22,16 @@ public class Deal {
     @ApiModelProperty(notes = "Статус заявки", example = "Новая, Выполнена, Отменена")
     private String status;
     @Column(scale = 4, precision = 19)
+    @ApiModelProperty(value = "Сумма сделки")
     private BigDecimal sumDeal;
     @ApiModelProperty(notes = "Валюта сделки", example = "USD, EUR, RUR, BTC")
     private String currency;
     @Column(scale = 4, precision = 19)
+    @ApiModelProperty(notes = "Сумма сделки в грн.")
     private BigDecimal sumDealInUah;
     @ApiModelProperty(notes = "Сумма дохода от данной сделки")
     private BigDecimal income;
+    @ApiModelProperty(notes = "Дата сделки")
     private LocalDateTime dateDeal;
     @ApiModelProperty(notes = "Тип опрерации", example = "buy, sale")
     private String typeOfOperation;

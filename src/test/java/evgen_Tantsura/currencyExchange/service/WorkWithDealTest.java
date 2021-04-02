@@ -21,7 +21,7 @@ import java.util.Map;
 @SpringBootTest
 @Transactional
 @Sql(value = {"/create-deal-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(value = {"/create-exchangeRates-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(value = {"/create-exchangeRates-dateNow-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class WorkWithDealTest {
 
     @Autowired
@@ -74,8 +74,8 @@ public class WorkWithDealTest {
 
     @Test
     public void shouldCountTransactionsByCurrency() {
-        String actualResult = workWithDeal.countTransactionsByCurrency(dealRepository);
-        String expectedResult = "Кількість угод з ПРИДБАННЯ, у валюті: USD = 2 на суму: 200.0000\t Прибуток складає: 57.00 грн.\n" +
+        String actualResult = workWithDeal.generatingASalesReport(dealRepository);
+        String expectedResult = "Кількість угод з ПРИДБАННЯ, у валюті: USD = 0 на суму: null\t Прибуток складає: null грн.\n" +
                 "Кількість угод з ПРИДБАННЯ, у валюті: EUR = 0 на суму: null\t Прибуток складає: null грн.\n" +
                 "Кількість угод з ПРИДБАННЯ, у валюті: RUR = 1 на суму: 100.0000\t Прибуток складає: 28.50 грн.\n" +
                 "Кількість угод з ПРИДБАННЯ, у валюті: BTC = 0 на суму: null\t Прибуток складає: null грн.\n" +

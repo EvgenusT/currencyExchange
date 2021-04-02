@@ -49,4 +49,7 @@ public interface DealRepository extends JpaRepository<Deal, Integer> {
     @Query(value = "SELECT * FROM Deal WHERE CURRENCY = ?1 AND DATE_DEAL >= ?2 AND DATE_DEAL <= ?3", nativeQuery = true)
     List<Deal> findAllByCurrencyAndPeriod(String currency, LocalDateTime beginning, LocalDateTime end);
 
+    @Query(value = "SELECT * FROM Deal WHERE ID = ?1", nativeQuery = true)
+    Map<String, String> findById(String id);
+
 }

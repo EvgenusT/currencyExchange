@@ -3,9 +3,9 @@ package evgen_Tantsura.currencyExchange.controller;
 import evgen_Tantsura.currencyExchange.entity.Deal;
 import evgen_Tantsura.currencyExchange.repository.DealRepository;
 import evgen_Tantsura.currencyExchange.repository.ExchangeRatesRepository;
-import evgen_Tantsura.currencyExchange.utils.CONST;
 import evgen_Tantsura.currencyExchange.service.ReceivingCourses;
 import evgen_Tantsura.currencyExchange.service.WorkWithDeal;
+import evgen_Tantsura.currencyExchange.utils.CONST;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.json.JSONException;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("currencyExchange")
-@Api(value = "CurrencyExchangeController", description = "Application that simulates the operation of a point for selling currencies")
+@Api(value = "CurrencyExchangeController", description = "Приложение, имитирующее работу пункта по продаже валюты")
 public class CurrencyExchangeController {
 
     ReceivingCourses receivingCourses = new ReceivingCourses();
@@ -32,7 +32,7 @@ public class CurrencyExchangeController {
     DealRepository dealRepository;
 
     @GetMapping("/openingDay")
-    @ApiOperation(value = "Открытие рабочегодня дня")
+    @ApiOperation(value = "Открытие рабочего дня")
     public String requestCurrencyExchange() throws IOException, JSONException {
         receivingCourses.getCurrencyRates(exchangeRatesRepository, receivingCourses.processingJSON());
         return receivingCourses.getTextCurrencyRates(exchangeRatesRepository);
@@ -60,6 +60,7 @@ public class CurrencyExchangeController {
     }
 
     @PostMapping("/delete")
+    @ApiOperation(value = "Удаление заявки.")
     public String deleteDeal(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException {
         String response = null;
 
@@ -72,11 +73,13 @@ public class CurrencyExchangeController {
     }
 
     @GetMapping("/closingDay")
+    @ApiOperation(value = "Закрытие рабочего дня, формирование отчетов")
     public String closing() throws IOException, JSONException {
-        return workWithDeal.countTransactionsByCurrency(dealRepository);
+        return workWithDeal.generatingASalesReport(dealRepository);
     }
 
     @GetMapping("/report")
+    @ApiOperation(value = "Формирование ответов за необходимый период")
     public List<Deal> reportForThePeriod(@RequestBody Map<String, String> reguestMap) throws IOException, JSONException, ParseException {
         List<Deal> report = workWithDeal.report(dealRepository, reguestMap);
         return report;

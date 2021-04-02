@@ -17,8 +17,8 @@ import java.util.Random;
 
 public class WorkWithDeal {
 
-    StringBuffer sb = new StringBuffer();
-    String request = "";
+    private StringBuffer sb = new StringBuffer();
+    private String request = "";
 
     public String saveTheDeal(DealRepository dealRepository, ExchangeRatesRepository exchangeRatesRepository,
                               Map<String, String> reguestMap) {
@@ -29,20 +29,20 @@ public class WorkWithDeal {
         String otpPassword = null;
 
         if (typeOfOperation.equals(CONST.SALE)) {
-            ExchangeRates exchangeRates = exchangeRatesRepository.getTheCurrencySaleRate(currency);
+            ExchangeRates exchangeRates = exchangeRatesRepository.getTheCurrencyRate(currency);
             BigDecimal sumInCurrency = new BigDecimal(sum);
-            BigDecimal mySumInUAH = sumInCurrency.multiply(exchangeRates.getMySale());
-            BigDecimal sumInUAH = sumInCurrency.multiply(new BigDecimal(exchangeRates.getSale()));
-            BigDecimal income = mySumInUAH.subtract(sumInUAH);
+            BigDecimal mySumInBaseCcy = sumInCurrency.multiply(exchangeRates.getMySale());
+            BigDecimal sumInBaseCcy = sumInCurrency.multiply(new BigDecimal(exchangeRates.getSale()));
+            BigDecimal income = mySumInBaseCcy.subtract(sumInBaseCcy);
             otpPassword = createOtpPassword();
 
-            Deal deal = new Deal(tel, CONST.NEW, sumInCurrency, currency, mySumInUAH, income,
+            Deal deal = new Deal(tel, CONST.NEW, sumInCurrency, currency, mySumInBaseCcy, income,
                     LocalDateTime.now(), typeOfOperation, otpPassword);
             dealRepository.save(deal);
 
         } else if (typeOfOperation.equals(CONST.BUY)
         ) {
-            ExchangeRates exchangeRates = exchangeRatesRepository.getTheCurrencyPurchaseRate(currency);
+            ExchangeRates exchangeRates = exchangeRatesRepository.getTheCurrencyRate(currency);
             BigDecimal sumInCurrency = new BigDecimal(sum);
             BigDecimal mySumInUAH = sumInCurrency.multiply(exchangeRates.getMyBuy());
             BigDecimal sumInUAH = sumInCurrency.multiply(new BigDecimal(exchangeRates.getBuy()));
@@ -54,6 +54,9 @@ public class WorkWithDeal {
                     LocalDateTime.now(), typeOfOperation, otpPassword);
             dealRepository.save(deal);
         }
+
+        //тут должен быть вызов функционала для отправки СМС с ОТП паролем на номер клиента
+
         return otpPassword;
     }
 
@@ -82,38 +85,49 @@ public class WorkWithDeal {
         return check;
     }
 
-    public String countTransactionsByCurrency(DealRepository dealRepository) {
+    public String generatingASalesReport(DealRepository dealRepository) {
         List<String> current = Arrays.asList("USD", "EUR", "RUR", "BTC");
+        String baseCcy = "";
+
         for (String value : current) {
             int count = dealRepository.countDeals(value, CONST.BUY);
             BigDecimal sumDeals = dealRepository.sumDeals(value, CONST.BUY);
             BigDecimal income = dealRepository.sumIncomForCurrency(value, CONST.BUY);
-            sb.append("Кількість угод з ПРИДБАННЯ, у валюті: ")
-                    .append(value).append(" = ")
-                    .append(count).append(" на суму: ")
-                    .append(sumDeals)
-                    .append("\t Прибуток складає: ")
-                    .append(income)
-                    .append(" грн.")
-                    .append("\n");
+            if (value.equals("BTC")) {
+                baseCcy = "USD";
+            } else baseCcy = "UAH";
+            sb = stringFormation(value, count, sumDeals, income, baseCcy);
         }
         sb.append("----------------------------\n");
         for (String value : current) {
             int count = dealRepository.countDeals(value, CONST.SALE);
             BigDecimal sumDeals = dealRepository.sumDeals(value, CONST.SALE);
             BigDecimal income = dealRepository.sumIncomForCurrency(value, CONST.SALE);
-            sb.append("Кількість угод з ПРОДАЖУ, у валюті: ")
-                    .append(value).append(" = ")
-                    .append(count).append(" на суму: ")
-                    .append(sumDeals)
-                    .append("\t Прибуток складає: ")
-                    .append(income)
-                    .append(" грн.")
-                    .append("\n");
+            if (value.equals("BTC")) {
+                baseCcy = "USD";
+            } else baseCcy = "UAH";
+            sb = stringFormation(value, count, sumDeals, income, baseCcy);
         }
         sb.append("----------------------------\n");
+
         request = sb.toString();
         return request;
+    }
+
+    private StringBuffer stringFormation(String value, int count, BigDecimal sumDeals, BigDecimal income, String baseCcy) {
+        sb.append("Кількість угод з ПРИДБАННЯ, у валюті: ")
+                .append(value).append(" = ")
+                .append(count).append(" на суму: ")
+                .append(sumDeals)
+                .append("\t Прибуток складає: ")
+                .append(income)
+                .append(" ")
+                .append(baseCcy)
+                .append("\n");
+
+        sb.append("----------------------------\n");
+
+        return sb;
     }
 
     public List<Deal> report(DealRepository dealRepository, Map<String, String> reguestMap) throws ParseException {
