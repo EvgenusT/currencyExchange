@@ -1,58 +1,71 @@
 package evgen_Tantsura.currencyExchange.service;
 
-import evgen_Tantsura.currencyExchange.entity.Deal;
-import evgen_Tantsura.currencyExchange.entity.ExchangeRates;
-import evgen_Tantsura.currencyExchange.repository.DealRepository;
-import evgen_Tantsura.currencyExchange.repository.ExchangeRatesRepository;
+import evgen_Tantsura.currencyExchange.entity.*;
+import evgen_Tantsura.currencyExchange.repository.*;
 import evgen_Tantsura.currencyExchange.utils.CONST;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+@Service
 public class WorkWithDeal {
+
+    @Autowired
+    ExchangeRatesRepository exchangeRatesRepository;
+
+    @Autowired
+    DealRepository dealRepository;
+
+    @Autowired
+    RequestDealRepository requestDealRepository;
+
+    @Autowired
+    ResponseDealRepository responseDealRepository;
+
+    @Autowired
+    DeleteDealRepository deleteDealRepository;
+
+    @Autowired
+    ReportDealRepository reportDealRepository;
 
     private StringBuffer sb = new StringBuffer();
     private String request = "";
 
-    public String saveTheDeal(DealRepository dealRepository, ExchangeRatesRepository exchangeRatesRepository,
-                              Map<String, String> reguestMap) {
-        String currency = reguestMap.get(CONST.CURRENCY);
-        String sum = reguestMap.get(CONST.SUM);
-        String tel = reguestMap.get(CONST.TEL);
-        String typeOfOperation = reguestMap.get(CONST.TYPE_OF_OPERATION);
+    public String saveTheDeal(RequestDeal newRequestDeal) {
+
+        requestDealRepository.save(newRequestDeal);
+
         String otpPassword = null;
 
-        if (typeOfOperation.equals(CONST.SALE)) {
-            ExchangeRates exchangeRates = exchangeRatesRepository.getTheCurrencyRate(currency);
-            BigDecimal sumInCurrency = new BigDecimal(sum);
+        if (newRequestDeal.getTypeOfOperation().equals(CONST.SALE)) {
+            ExchangeRates exchangeRates = exchangeRatesRepository.getTheCurrencyRate(newRequestDeal.getCurrency());
+            BigDecimal sumInCurrency = new BigDecimal(newRequestDeal.getSum());
             BigDecimal mySumInBaseCcy = sumInCurrency.multiply(exchangeRates.getMySale());
             BigDecimal sumInBaseCcy = sumInCurrency.multiply(new BigDecimal(exchangeRates.getSale()));
             BigDecimal income = mySumInBaseCcy.subtract(sumInBaseCcy);
             otpPassword = createOtpPassword();
 
-            Deal deal = new Deal(tel, CONST.NEW, sumInCurrency, currency, mySumInBaseCcy, income,
-                    LocalDateTime.now(), typeOfOperation, otpPassword);
-            dealRepository.save(deal);
+            dealRepository.save(new Deal(newRequestDeal.getTel(), CONST.NEW, sumInCurrency, newRequestDeal.getCurrency(), mySumInBaseCcy, income,
+                    LocalDateTime.now(), newRequestDeal.getTypeOfOperation(), otpPassword));
 
-        } else if (typeOfOperation.equals(CONST.BUY)
+        } else if (newRequestDeal.getTypeOfOperation().equals(CONST.BUY)
         ) {
-            ExchangeRates exchangeRates = exchangeRatesRepository.getTheCurrencyRate(currency);
-            BigDecimal sumInCurrency = new BigDecimal(sum);
+            ExchangeRates exchangeRates = exchangeRatesRepository.getTheCurrencyRate(newRequestDeal.getCurrency());
+            BigDecimal sumInCurrency = new BigDecimal(newRequestDeal.getSum());
             BigDecimal mySumInUAH = sumInCurrency.multiply(exchangeRates.getMyBuy());
             BigDecimal sumInUAH = sumInCurrency.multiply(new BigDecimal(exchangeRates.getBuy()));
             BigDecimal income = sumInUAH.subtract(mySumInUAH);
 
             otpPassword = createOtpPassword();
-
-            Deal deal = new Deal(tel, CONST.NEW, sumInCurrency, currency, mySumInUAH, income,
-                    LocalDateTime.now(), typeOfOperation, otpPassword);
-            dealRepository.save(deal);
+            dealRepository.save(new Deal(newRequestDeal.getTel(), CONST.NEW, sumInCurrency, newRequestDeal.getCurrency(), mySumInUAH, income,
+                    LocalDateTime.now(), newRequestDeal.getTypeOfOperation(), otpPassword));
         }
 
         //тут должен быть вызов функционала для отправки СМС с ОТП паролем на номер клиента
@@ -60,32 +73,35 @@ public class WorkWithDeal {
         return otpPassword;
     }
 
-    public void updateTheDeal(DealRepository dealRepository, Map<String, String> reguestMap) {
-        String tel = reguestMap.get(CONST.TEL);
-        String otpPass = reguestMap.get(CONST.OTP_PASS);
-        dealRepository.updateStatus(CONST.COMPLETED, tel, otpPass);
+    public Map<String, String> checkStatusDeal(ResponseDeal newResponseDeal) {
+        return dealRepository.checkStatus(newResponseDeal.getTel(), newResponseDeal.getOtpPass());
     }
 
-    public void cancellationTheDeal(DealRepository dealRepository, Map<String, String> reguestMap) {
-        String tel = reguestMap.get(CONST.TEL);
-        dealRepository.cancellationStatus(CONST.REJECTED, tel);
+
+    public void updateTheDeal(ResponseDeal newResponseDeal) {
+        responseDealRepository.save(newResponseDeal);
+        dealRepository.updateStatus(CONST.COMPLETED, newResponseDeal.getTel(), newResponseDeal.getOtpPass());
     }
 
-    public void removeTheDeal(DealRepository dealRepository, Map<String, String> reguestMap) {
-        dealRepository.remove(reguestMap.get(CONST.ID), reguestMap.get(CONST.TEL));
-
+    public void cancellationTheDeal(ResponseDeal newResponseDeal) {
+        dealRepository.cancellationStatus(CONST.REJECTED, newResponseDeal.getTel());
     }
 
-    public boolean checkForRemove(DealRepository dealRepository, Map<String, String> reguestMap) {
+    public void removeTheDeal(DeleteDeal newDeleteDeal) {
+        deleteDealRepository.save(newDeleteDeal);
+        dealRepository.remove(newDeleteDeal.getId(), newDeleteDeal.getTel());
+    }
+
+    public boolean checkForRemove(DeleteDeal newDeleteDeal) {
         boolean check = false;
         Map<String, String> checkBooleanDeal = dealRepository.checkBooleanDeal
-                (reguestMap.get(CONST.ID), reguestMap.get(CONST.TEL));
+                (newDeleteDeal.getId(), newDeleteDeal.getTel());
         if (!checkBooleanDeal.isEmpty())
             check = true;
         return check;
     }
 
-    public String generatingASalesReport(DealRepository dealRepository) {
+    public String generatingASalesReport() {
         List<String> current = Arrays.asList("USD", "EUR", "RUR", "BTC");
         String baseCcy = "";
 
@@ -96,7 +112,7 @@ public class WorkWithDeal {
             if (value.equals("BTC")) {
                 baseCcy = "USD";
             } else baseCcy = "UAH";
-            sb = stringFormation(value, count, sumDeals, income, baseCcy);
+            sb = stringFormation(CONST.BUY, value, count, sumDeals, income, baseCcy);
         }
         sb.append("----------------------------\n");
         for (String value : current) {
@@ -106,7 +122,7 @@ public class WorkWithDeal {
             if (value.equals("BTC")) {
                 baseCcy = "USD";
             } else baseCcy = "UAH";
-            sb = stringFormation(value, count, sumDeals, income, baseCcy);
+            sb = stringFormation(CONST.SALE, value, count, sumDeals, income, baseCcy);
         }
         sb.append("----------------------------\n");
 
@@ -114,34 +130,36 @@ public class WorkWithDeal {
         return request;
     }
 
-    private StringBuffer stringFormation(String value, int count, BigDecimal sumDeals, BigDecimal income, String baseCcy) {
-        sb.append("Кількість угод з ПРИДБАННЯ, у валюті: ")
-                .append(value).append(" = ")
-                .append(count).append(" на суму: ")
-                .append(sumDeals)
-                .append("\t Прибуток складає: ")
-                .append(income)
-                .append(" ")
-                .append(baseCcy)
-                .append("\n");
-
-        sb.append("----------------------------\n");
-
+    private StringBuffer stringFormation(String typeDeal, String value, int count, BigDecimal sumDeals, BigDecimal income, String baseCcy) {
+        if (typeDeal.equals(CONST.BUY)) {
+            sb.append("Кількість угод з ПРИДБАННЯ, у валюті: ")
+                    .append(value).append(" = ")
+                    .append(count).append(" на суму: ")
+                    .append(sumDeals)
+                    .append("\t Прибуток складає: ")
+                    .append(income)
+                    .append(" ")
+                    .append(baseCcy)
+                    .append("\n");
+        } else {
+            sb.append("Кількість угод з ПРОДАЖУ, у валюті: ")
+                    .append(value).append(" = ")
+                    .append(count).append(" на суму: ")
+                    .append(sumDeals)
+                    .append("\t Прибуток складає: ")
+                    .append(income)
+                    .append(" ")
+                    .append(baseCcy)
+                    .append("\n");
+        }
         return sb;
     }
 
-    public List<Deal> report(DealRepository dealRepository, Map<String, String> reguestMap) throws ParseException {
-        String currency = reguestMap.get(CONST.CURRENCY);
-        LocalDateTime beginning = convertFormatDate(reguestMap.get(CONST.BEGINNING));
-        LocalDateTime end = convertFormatDate(reguestMap.get(CONST.END));
-        List<Deal> allByCurrencyAndPeriod = dealRepository.findAllByCurrencyAndPeriod(currency, beginning, end);
+    public List<Deal> report(ReportDeal newReportDeal) throws ParseException {
+        reportDealRepository.save(newReportDeal);
+        List<Deal> allByCurrencyAndPeriod = dealRepository.findAllByCurrencyAndPeriod(newReportDeal.getCurrency(),
+                newReportDeal.getBeginning(), newReportDeal.getEnd());
         return allByCurrencyAndPeriod;
-    }
-
-    private LocalDateTime convertFormatDate(String date) throws ParseException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
-        return dateTime;
     }
 
     private String createOtpPassword() {

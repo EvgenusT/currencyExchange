@@ -1,4 +1,4 @@
-INSERT INTO DEAL (id, currency, date_deal, otp_pass, status, sum_deal, sum_deal_in_uah, income, tel, type_of_operation)
+INSERT INTO DEAL (id, currency, date_deal, otp_pass, status, sum_deal, sum_deal_in_base_cyy, income, tel, type_of_operation)
  VALUES
  ('1', 'USD', '2021-03-24 17:34:51.000006762', '218948','Новая', 20000.0000, 683550.0000, 2055.5000, '0504520376', 'buy'),
  ('2', 'RUR', NOW(), '533581', 'Выполнена', 200.0000, 6835.5000, 20.1500, '0504520377', 'sale'),

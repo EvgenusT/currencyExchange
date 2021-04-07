@@ -28,7 +28,7 @@ public class Deal {
     private String currency;
     @Column(scale = 4, precision = 19)
     @ApiModelProperty(notes = "Сумма сделки в грн.")
-    private BigDecimal sumDealInUah;
+    private BigDecimal sumDealInBaseCyy;
     @ApiModelProperty(notes = "Сумма дохода от данной сделки")
     private BigDecimal income;
     @ApiModelProperty(notes = "Дата сделки")
@@ -38,13 +38,13 @@ public class Deal {
     @ApiModelProperty(notes = "Пароль подтверждения сделки, 6 значный", example = "123456")
     private String otpPass;
 
-    public Deal(String tel, String status, BigDecimal sumDeal, String currency, BigDecimal sumDealInUah,
+    public Deal(String tel, String status, BigDecimal sumDeal, String currency, BigDecimal sumDealInBaseCyy,
                 BigDecimal income, LocalDateTime dateDeal, String typeOfOperation, String otpPass) {
         this.tel = tel;
         this.status = status;
         this.sumDeal = sumDeal;
         this.currency = currency;
-        this.sumDealInUah = sumDealInUah;
+        this.sumDealInBaseCyy = sumDealInBaseCyy;
         this.income = income;
         this.dateDeal = dateDeal;
         this.typeOfOperation = typeOfOperation;
@@ -52,13 +52,13 @@ public class Deal {
     }
 
     public Deal(int id, String tel, String status, BigDecimal sumDeal, String currency,
-                BigDecimal sumDealInUah, BigDecimal income, LocalDateTime dateDeal, String typeOfOperation, String otpPass) {
+                BigDecimal sumDealInBaseCyy, BigDecimal income, LocalDateTime dateDeal, String typeOfOperation, String otpPass) {
         this.id = id;
         this.tel = tel;
         this.status = status;
         this.sumDeal = sumDeal;
         this.currency = currency;
-        this.sumDealInUah = sumDealInUah;
+        this.sumDealInBaseCyy = sumDealInBaseCyy;
         this.income = income;
         this.dateDeal = dateDeal;
         this.typeOfOperation = typeOfOperation;

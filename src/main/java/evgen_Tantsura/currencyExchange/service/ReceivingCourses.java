@@ -7,6 +7,8 @@ import evgen_Tantsura.currencyExchange.utils.CONST;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -16,9 +18,16 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
+@Service
 public class ReceivingCourses {
+
+    @Autowired
+    ExchangeRatesRepository exchangeRatesRepository;
 
     public static final BigDecimal margin = new BigDecimal(0.00500);
 
@@ -59,7 +68,7 @@ public class ReceivingCourses {
         return resultJson;
     }
 
-    public void getCurrencyRates(ExchangeRatesRepository exchangeRatesRepository, List<Map<String, String>> listJson) {
+    public void getCurrencyRates(List<Map<String, String>> listJson) {
         ExchangeRates newExchangeRates = null;
         for (int i = 0; i < listJson.size(); i++) {
             Map<String, String> stringMap = listJson.get(i);
@@ -72,7 +81,7 @@ public class ReceivingCourses {
         }
     }
 
-    public String getTextCurrencyRates(ExchangeRatesRepository exchangeRatesRepository) {
+    public String getTextCurrencyRates() {
         List<String> current = Arrays.asList("USD", "EUR", "RUR", "BTC");
         StringBuffer sb = new StringBuffer("\n");
         String request = "";

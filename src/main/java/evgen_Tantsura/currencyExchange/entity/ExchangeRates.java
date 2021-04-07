@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class ExchangeRates {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.TABLE)
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private int id;
     @ApiModelProperty(notes = "Валюта", example = "USD, EUR, RUR, BTC")
     private String ccy;

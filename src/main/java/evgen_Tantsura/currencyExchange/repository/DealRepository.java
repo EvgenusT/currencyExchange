@@ -26,13 +26,13 @@ public interface DealRepository extends JpaRepository<Deal, Integer> {
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM Deal WHERE ID = ?1 AND TEL = ?2 AND STATUS = 'Новая'", nativeQuery = true)
-    void remove(String id, String tel);
+    void remove(int id, String tel);
 
     @Query(value = "SELECT TEL, OTP_PASS FROM Deal WHERE TEL = ?1 AND OTP_PASS = ?2", nativeQuery = true)
     Map<String, String> checkStatus(String tel, String otpPass);
 
     @Query(value = "SELECT ID, TEL FROM Deal WHERE ID = ?1 AND TEL = ?2 AND STATUS = 'Новая'", nativeQuery = true)
-    Map<String, String> checkBooleanDeal(String id, String tel);
+    Map<String, String> checkBooleanDeal(int id, String tel);
 
     @Query(value = "SELECT COUNT(*) FROM Deal WHERE CURRENCY = ?1 AND STATUS = 'Выполнена' AND DATE_DEAL >= CURDATE() " +
             "AND TYPE_OF_OPERATION  = ?2", nativeQuery = true)
