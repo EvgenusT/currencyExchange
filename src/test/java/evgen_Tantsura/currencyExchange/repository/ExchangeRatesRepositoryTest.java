@@ -16,7 +16,7 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-@Sql(value = {"/create-exchangeRates-dateNow-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(value = {"/create-exchangeRates-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class ExchangeRatesRepositoryTest {
 
     @Autowired
@@ -64,19 +64,6 @@ public class ExchangeRatesRepositoryTest {
         Assert.assertEquals(actualResult.get("my_buy"), new BigDecimal("54665.0658"));
         Assert.assertEquals(actualResult.get("my_sale"), new BigDecimal("61026.5123"));
         Assert.assertEquals(actualResult.get("sale"), "60722.8978");
-    }
-
-    @Test
-    public void shouldGetTheCurrencyRateUSD(){
-        ExchangeRates actualResult = exchangeRatesRepository.getTheCurrencyRate("USD");
-        Assert.assertEquals(actualResult.getId(), 1);
-        Assert.assertEquals(actualResult.getBase_ccy(), "UAH");
-        Assert.assertEquals(actualResult.getBuy(), "27.55000");
-        Assert.assertEquals(actualResult.getMyBuy(), new BigDecimal("27.4122"));
-        Assert.assertEquals(actualResult.getMySale(), new BigDecimal("28.0898"));
-        Assert.assertEquals(actualResult.getSale(), "27.95000");
-
-
     }
 
 }

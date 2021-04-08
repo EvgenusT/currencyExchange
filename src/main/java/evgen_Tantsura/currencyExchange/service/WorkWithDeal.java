@@ -68,7 +68,7 @@ public class WorkWithDeal {
                     LocalDateTime.now(), newRequestDeal.getTypeOfOperation(), otpPassword));
         }
 
-        //тут должен быть вызов функционала для отправки СМС с ОТП паролем на номер клиента
+        //тут может быть вызов функционала для отправки СМС с ОТП паролем на номер телефона клиента
 
         return otpPassword;
     }

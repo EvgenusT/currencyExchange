@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @Sql(value = {"/create-deal-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class CurrencyExchangeControllerTest {
+class CurrencyExchangeControllerImplTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -54,13 +54,12 @@ class CurrencyExchangeControllerTest {
     @Test
     void shouldOkRequestCurrencyDeal() throws Exception {
         currencyExchangeController.requestCurrencyExchange();
-        Gson gson = new Gson();
         Map<String, String> map = new HashMap<>();
         map.put("currency", "USD");
         map.put("sum", "2400");
         map.put("tel", "0504520387");
         map.put("typeOfOperation", "sale");
-        String json = gson.toJson(map);
+        String json = new Gson().toJson(map);
 
         this.mockMvc.perform(post("/currencyExchange/request").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
@@ -68,12 +67,11 @@ class CurrencyExchangeControllerTest {
     }
 
     @Test
-       void shouldOkResponseCurrencyDeal() throws Exception {
-        Gson gson = new Gson();
+    void shouldOkResponseCurrencyDeal() throws Exception {
         Map<String, String> mapForTest = new HashMap<>();
         mapForTest.put("tel", "0504520366");
         mapForTest.put("otpPass", "111111");
-        String json = gson.toJson(mapForTest);
+        String json = new Gson().toJson(mapForTest);
 
         this.mockMvc.perform(post("/currencyExchange/response").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
@@ -82,13 +80,11 @@ class CurrencyExchangeControllerTest {
     }
 
     @Test
-
     void shouldNotOkResponseCurrencyDeal() throws Exception {
-        Gson gson = new Gson();
         Map<String, String> mapForTest = new HashMap<>();
         mapForTest.put("tel", "0504520366");
         mapForTest.put("otpPass", "111110");
-        String json = gson.toJson(mapForTest);
+        String json = new Gson().toJson(mapForTest);
 
         this.mockMvc.perform(post("/currencyExchange/response").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
@@ -98,27 +94,23 @@ class CurrencyExchangeControllerTest {
 
 
     @Test
-        void shouldOkDeleteDeal() throws Exception {
-        Gson gson = new Gson();
+    void shouldOkDeleteDeal() throws Exception {
         Map<String, String> mapForTest = new HashMap<>();
         mapForTest.put("id", "4");
         mapForTest.put("tel", "0504520366");
-        String json = gson.toJson(mapForTest);
+        String json = new Gson().toJson(mapForTest);
 
         this.mockMvc.perform(post("/currencyExchange/delete").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
                 .andExpect(status().isOk());
-//                .andExpect(content().string(containsString("Заявка №: 4 - удалена")));
     }
 
     @Test
-
     void shouldNotOkDeleteDeal() throws Exception {
-        Gson gson = new Gson();
         Map<String, String> mapForTest = new HashMap<>();
         mapForTest.put("id", "1");
         mapForTest.put("tel", "0504520365");
-        String json = gson.toJson(mapForTest);
+        String json = new Gson().toJson(mapForTest);
 
         this.mockMvc.perform(post("/currencyExchange/delete").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
@@ -135,16 +127,14 @@ class CurrencyExchangeControllerTest {
     }
 
     @Test
-
     void shouldReportForThePeriod() throws Exception {
-        Gson gson = new Gson();
         Map<String, String> mapForTest = new HashMap<>();
         mapForTest.put("currency", "USD");
-        mapForTest.put("beginning", "2021-03-24 00:00:00");
-        mapForTest.put("end", "2021-03-30 23:59:59");
-        String json = gson.toJson(mapForTest);
+        mapForTest.put("beginning", "2021-03-24 00:00");
+        mapForTest.put("end", "2021-03-30 23:59");
+        String json = new Gson().toJson(mapForTest);
 
-        this.mockMvc.perform(get("/currencyExchange/report").contentType(MediaType.APPLICATION_JSON).content(json))
+        this.mockMvc.perform(post("/currencyExchange/report").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
                 .andExpect(status().isOk());
 

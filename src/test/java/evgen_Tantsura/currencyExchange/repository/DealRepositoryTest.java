@@ -50,7 +50,7 @@ public class DealRepositoryTest {
     @Test
     public void shouldRemoveOk() {
         DealRepository dealRepository = this.dealRepository;
-        dealRepository.remove("5", "0504520368");
+        dealRepository.remove(5, "0504520368");
         Map<String, String> requestForId = dealRepository.findById("5");
         assertFalse(requestForId.isEmpty());
     }
@@ -66,12 +66,12 @@ public class DealRepositoryTest {
 
     @Test
     public void shouldCheckBooleanDealIsNotNull() {
-        Assert.assertTrue(!dealRepository.checkBooleanDeal("6", "0504520369").isEmpty());
+        Assert.assertTrue(!dealRepository.checkBooleanDeal(6, "0504520369").isEmpty());
     }
 
     @Test
     public void shouldCheckBooleanDealIsNull() {
-        Assert.assertTrue(dealRepository.checkBooleanDeal("611", "0504520369").isEmpty());
+        Assert.assertTrue(dealRepository.checkBooleanDeal(611, "0504520369").isEmpty());
     }
 
     @Test

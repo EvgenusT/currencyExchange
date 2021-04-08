@@ -1,9 +1,11 @@
 package evgen_Tantsura.currencyExchange.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -32,6 +34,8 @@ public class Deal {
     @ApiModelProperty(notes = "Сумма дохода от данной сделки")
     private BigDecimal income;
     @ApiModelProperty(notes = "Дата сделки")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime dateDeal;
     @ApiModelProperty(notes = "Тип опрерации", example = "buy, sale")
     private String typeOfOperation;

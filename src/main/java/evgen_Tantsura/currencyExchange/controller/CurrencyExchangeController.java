@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Map;
 
 @Api(value = "CurrencyExchangeController", description = "Приложение, имитирующее работу пункта по продаже валюты")
 public interface CurrencyExchangeController {

@@ -1,9 +1,11 @@
 package evgen_Tantsura.currencyExchange.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -27,6 +29,8 @@ public class ExchangeRates {
     @ApiModelProperty(notes = "Продажа")
     private String sale;
     @ApiModelProperty(notes = "Дата и время получения курсов Приват Банка")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime dateAndTime;
     @Column(scale = 4, precision = 19)
     @ApiModelProperty(notes = "Курс покупки с учетом маржи")
