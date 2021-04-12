@@ -7,7 +7,6 @@ import evgen_Tantsura.currencyExchange.utils.CONST;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -26,8 +25,11 @@ import java.util.Map;
 @Service
 public class ReceivingCourses {
 
-    @Autowired
-    ExchangeRatesRepository exchangeRatesRepository;
+    private final ExchangeRatesRepository exchangeRatesRepository;
+
+    public ReceivingCourses(ExchangeRatesRepository exchangeRatesRepository) {
+        this.exchangeRatesRepository = exchangeRatesRepository;
+    }
 
     public static final BigDecimal margin = new BigDecimal(0.00500);
 

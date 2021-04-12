@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import org.json.JSONException;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -17,17 +18,17 @@ public interface CurrencyExchangeController {
     public String requestCurrencyExchange() throws IOException, JSONException;
 
     @ApiOperation(value = "Заявка на продажу/покупку валюты от пользователя")
-    public String requestCurrencyDeal(@RequestBody RequestDeal requestDeal) throws IOException, JSONException;
+    public String requestCurrencyDeal(@RequestBody @Valid RequestDeal requestDeal) throws IOException, JSONException;
 
     @ApiOperation(value = "Подтверждение заявки пользователем")
-    public String responseCurrencyDeal(@RequestBody ResponseDeal newResponseDeal) throws IOException, JSONException;
+    public String responseCurrencyDeal(@RequestBody @Valid  ResponseDeal newResponseDeal) throws IOException, JSONException;
 
     @ApiOperation(value = "Удаление заявки.")
-    public String deleteDeal(@RequestBody DeleteDeal newDeleteDeal) throws IOException, JSONException;
+    public String deleteDeal(@RequestBody @Valid  DeleteDeal newDeleteDeal) throws IOException, JSONException;
 
     @ApiOperation(value = "Закрытие рабочего дня, формирование отчетов")
     public String closing() throws IOException, JSONException;
 
     @ApiOperation(value = "Формирование ответов за необходимый период")
-    public List<Deal> reportForThePeriod(@RequestBody ReportDeal newReportDeal) throws IOException, JSONException, ParseException;
+    public List<Deal> reportForThePeriod(@RequestBody @Valid  ReportDeal newReportDeal) throws IOException, JSONException, ParseException;
 }

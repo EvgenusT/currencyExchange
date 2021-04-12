@@ -1,131 +1,174 @@
 package evgen_Tantsura.currencyExchange.service;
 
-import evgen_Tantsura.currencyExchange.entity.Deal;
-import evgen_Tantsura.currencyExchange.entity.DeleteDeal;
-import evgen_Tantsura.currencyExchange.entity.ReportDeal;
-import evgen_Tantsura.currencyExchange.entity.RequestDeal;
-import evgen_Tantsura.currencyExchange.repository.DealRepository;
-import evgen_Tantsura.currencyExchange.repository.DeleteDealRepository;
-import evgen_Tantsura.currencyExchange.repository.ExchangeRatesRepository;
-import evgen_Tantsura.currencyExchange.repository.ReportDealRepository;
-import org.junit.Assert;
+import evgen_Tantsura.currencyExchange.entity.*;
+import evgen_Tantsura.currencyExchange.repository.*;
+import evgen_Tantsura.currencyExchange.utils.CONST;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-//@RunWith(MockitoJUnitRunner.class)
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@Transactional
-@Sql(value = {"/create-deal-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(value = {"/create-exchangeRates-dateNow-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@RunWith(MockitoJUnitRunner.class)
 public class WorkWithDealTest {
 
-    @Autowired
-    private DealRepository dealRepository;
-
-    @Autowired
-    private ExchangeRatesRepository exchangeRatesRepository;
-
-    @Autowired
-    ReportDealRepository reportDealRepository;
-
-    @Autowired
-    DeleteDealRepository newDeleteDealRepository;
-
-    @Autowired
     private WorkWithDeal workWithDeal;
 
+    private DealRepository dealRepository;
+    private ExchangeRatesRepository exchangeRatesRepository;
+    private RequestDealRepository requestDealRepository;
+    private ResponseDealRepository responseDealRepository;
+    private DeleteDealRepository deleteDealRepository;
+    private ReportDealRepository reportDealRepository;
+
+    private RequestDeal requestDeal;
+    private ResponseDeal responseDeal;
+    private DeleteDeal deleteDeal;
+    private ReportDeal reportDeal;
+
+    @Before
+    public void init() {
+
+        this.exchangeRatesRepository = Mockito.mock(ExchangeRatesRepository.class);
+        this.dealRepository = Mockito.mock(DealRepository.class);
+        this.requestDealRepository = Mockito.mock(RequestDealRepository.class);
+        this.responseDealRepository = Mockito.mock(ResponseDealRepository.class);
+        this.deleteDealRepository = Mockito.mock(DeleteDealRepository.class);
+        this.reportDealRepository = Mockito.mock(ReportDealRepository.class);
+        this.workWithDeal = new WorkWithDeal(exchangeRatesRepository, dealRepository, requestDealRepository,
+                responseDealRepository, deleteDealRepository, reportDealRepository);
+
+        this.requestDeal = new RequestDeal();
+        this.responseDeal = new ResponseDeal();
+        this.deleteDeal = new DeleteDeal();
+        this.reportDeal = new ReportDeal();
+    }
 
     @Test
-    public void shouldLengthOtpPasswordSale() {
-        RequestDeal requestDeal = new RequestDeal();
+    public void shouldSaveTheDeal() {
+        requestDeal.setId(1);
         requestDeal.setCurrency("USD");
-        requestDeal.setSum("2400");
-        requestDeal.setTel("0504520387");
+        requestDeal.setSum("100");
+        requestDeal.setTel("0504520366");
         requestDeal.setTypeOfOperation("sale");
-        String result = workWithDeal.saveTheDeal(requestDeal);
-        Assert.assertEquals(result.length(), 6);
+
+        Mockito.when(exchangeRatesRepository.getTheCurrencyRate("USD")).thenReturn(new ExchangeRates("USD", "UAH", "111",
+                "120", LocalDateTime.of(2021, 04, 12, 9, 00), new BigDecimal("112"), new BigDecimal("121")));
+
+        String otpPass = workWithDeal.saveTheDeal(requestDeal);
+
+        Mockito.verify(requestDealRepository, Mockito.times(1)).save(requestDeal);
+        Mockito.verify(dealRepository, Mockito.times(1)).save(new Deal("0504520366", CONST.NEW,
+                new BigDecimal("100"), "USD", new BigDecimal("12100"), new BigDecimal("100"),
+                LocalDateTime.now(), "sale", otpPass));
     }
 
     @Test
-    public void shouldLengthOtpPasswordBuy() {
-        RequestDeal requestDeal = new RequestDeal();
-        requestDeal.setCurrency("USD");
-        requestDeal.setSum("2400");
-        requestDeal.setTel("0504520387");
-        requestDeal.setTypeOfOperation("buy");
-        String result = workWithDeal.saveTheDeal(requestDeal);
-        Assert.assertEquals(result.length(), 6);
+    public void shouldUpdateTheDeal() {
+        responseDeal.setOtpPass("1111111");
+        responseDeal.setTel("0504520366");
+        workWithDeal.updateTheDeal(responseDeal);
+        Mockito.verify(responseDealRepository, Mockito.times(1)).save(responseDeal);
+        Mockito.verify(dealRepository, Mockito.times(1)).updateStatus(CONST.COMPLETED, "0504520366", "1111111");
     }
 
     @Test
-    public void shouldCheckForRemove() {
-        DeleteDeal deleteDeal = new DeleteDeal();
+    public void shouldCancellationTheDealOk() {
+        responseDeal.setOtpPass("123456");
+        responseDeal.setTel("0504520366");
+        workWithDeal.cancellationTheDeal(responseDeal);
+        Mockito.verify(responseDealRepository, Mockito.times(1)).save(responseDeal);
+        Mockito.verify(dealRepository, Mockito.times(1)).cancellationStatus(CONST.REJECTED, "0504520366");
+    }
+
+    @Test
+    public void shouldRemoveTheDealOk() {
         deleteDeal.setId(1);
-        deleteDeal.setTel("0504520376");
-        boolean result = workWithDeal.checkForRemove(deleteDeal);
-        Assert.assertEquals(result, true);
+        deleteDeal.setTel("0504520366");
+        workWithDeal.removeTheDeal(deleteDeal);
+        Mockito.verify(deleteDealRepository, Mockito.times(1)).save(deleteDeal);
+        Mockito.verify(dealRepository, Mockito.times(1)).remove(1, "0504520366");
     }
 
     @Test
-    public void shouldCheckForRemoveNotOk() {
-        DeleteDeal deleteDeal = new DeleteDeal();
-        deleteDeal.setId(2);
-        deleteDeal.setTel("0504520376");
-        boolean result = workWithDeal.checkForRemove(deleteDeal);
-        Assert.assertFalse(result);
+    public void shouldSetCheckStatusDealOk() {
+        responseDeal.setOtpPass("1111111");
+        responseDeal.setTel("0504520366");
+        workWithDeal.checkStatusDeal(responseDeal);
+        Mockito.verify(dealRepository, Mockito.times(1)).checkStatus("0504520366", "1111111");
     }
 
     @Test
-    public void shouldCountTransactionsByCurrency() {
-        String actualResult = workWithDeal.generatingASalesReport();
-        String expectedResult =
-                "Кількість угод з ПРИДБАННЯ, у валюті: USD = 1 на суму: 100.0000\t Прибуток складає: 28.50 UAH\n" +
-                        "Кількість угод з ПРИДБАННЯ, у валюті: EUR = 0 на суму: null\t Прибуток складає: null UAH\n" +
-                        "Кількість угод з ПРИДБАННЯ, у валюті: RUR = 1 на суму: 100.0000\t Прибуток складає: 28.50 UAH\n" +
-                        "Кількість угод з ПРИДБАННЯ, у валюті: BTC = 0 на суму: null\t Прибуток складає: null USD\n" +
-                        "----------------------------\n" +
-                        "Кількість угод з ПРОДАЖУ, у валюті: USD = 1 на суму: 100.0000\t Прибуток складає: 28.50 UAH\n" +
-                        "Кількість угод з ПРОДАЖУ, у валюті: EUR = 0 на суму: null\t Прибуток складає: null UAH\n" +
-                        "Кількість угод з ПРОДАЖУ, у валюті: RUR = 1 на суму: 200.0000\t Прибуток складає: 20.15 UAH\n" +
-                        "Кількість угод з ПРОДАЖУ, у валюті: BTC = 0 на суму: null\t Прибуток складає: null USD\n" +
-                        "----------------------------\n";
+    public void shouldCheckForRemoveOk() {
+        deleteDeal.setId(1);
+        deleteDeal.setTel("0504520366");
 
-        Assert.assertEquals(expectedResult, actualResult);
+        Map<String, String> expected = new HashMap<>();
+        expected.put("id", "1");
+        expected.put("tel", "0504520366");
+
+        Mockito.when(dealRepository.checkBooleanDeal(1, "0504520366")).thenReturn(expected);
+        boolean expectedBoolean = workWithDeal.checkForRemove(deleteDeal);
+        Mockito.verify(dealRepository, Mockito.times(1)).checkBooleanDeal(1, "0504520366");
+        assertTrue(expectedBoolean);
     }
 
     @Test
-    public void shouldReportOk() throws ParseException {
-        ReportDeal newReportDeal = new ReportDeal();
-        String beginning = "2021-03-24T00:00:00";
-        String end = "2021-04-02T00:00:00";
-        newReportDeal.setCurrency("USD");
-        newReportDeal.setBeginning(LocalDateTime.parse(beginning));
-        newReportDeal.setEnd(LocalDateTime.parse(end));
-        List<Deal> actualResult = workWithDeal.report(newReportDeal);
+    public void shouldCheckStatusDeal() {
+        responseDeal.setOtpPass("111111");
+        responseDeal.setTel("0504520366");
 
-        Assert.assertEquals("218948", actualResult.get(0).getOtpPass());
-        Assert.assertEquals("111111", actualResult.get(1).getOtpPass());
-        Assert.assertEquals("454545", actualResult.get(2).getOtpPass());
-        Assert.assertEquals(1, actualResult.get(0).getId());
-        Assert.assertEquals(3, actualResult.get(1).getId());
-        Assert.assertEquals(7, actualResult.get(2).getId());
+        Map<String, String> expected = new HashMap<>();
+        expected.put("tel", "0504520366");
+        expected.put("otpPass", "111111");
+
+        Mockito.when(dealRepository.checkStatus("0504520366", "111111")).thenReturn(expected);
+
+        Map<String, String> actual = workWithDeal.checkStatusDeal(responseDeal);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldReport() throws ParseException {
+        reportDeal.setCurrency("USD");
+        reportDeal.setBeginning(LocalDateTime.of(2021, 04, 12, 9, 00));
+        reportDeal.setEnd(LocalDateTime.of(2021, 04, 12, 18, 00));
+
+        requestDeal.setId(1);
+        requestDeal.setCurrency("USD");
+        requestDeal.setSum("100");
+        requestDeal.setTel("0504520366");
+        requestDeal.setTypeOfOperation("sale");
+
+        Mockito.when(exchangeRatesRepository.getTheCurrencyRate("USD")).thenReturn(new ExchangeRates("USD", "UAH", "111",
+                "120", LocalDateTime.of(2021, 04, 12, 8, 00), new BigDecimal("112"), new BigDecimal("121")));
+
+        String otpPass = workWithDeal.saveTheDeal(requestDeal);
+
+        List<Deal> expected = new ArrayList<>();
+        expected.add(new Deal("0504520366", CONST.NEW,
+                new BigDecimal("100"), "USD", new BigDecimal("12100"), new BigDecimal("100"),
+                LocalDateTime.now(), "sale", otpPass));
+
+        Mockito.when(dealRepository.findAllByCurrencyAndPeriod("USD",
+                LocalDateTime.of(2021, 04, 12, 9, 00),
+                (LocalDateTime.of(2021, 04, 12, 18, 00))))
+                .thenReturn(expected);
+
+        List<Deal> actual = workWithDeal.report(reportDeal);
+        Mockito.verify(reportDealRepository, Mockito.times(1)).save(reportDeal);
+        assertEquals(expected, actual);
     }
 
 }

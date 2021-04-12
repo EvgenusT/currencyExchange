@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -30,12 +31,12 @@ public class CurrencyExchangeControllerImpl implements CurrencyExchangeControlle
     }
 
     @PostMapping("/request")
-    public String requestCurrencyDeal(@RequestBody RequestDeal newRequestDeal) throws IOException, JSONException {
+    public String requestCurrencyDeal(@Valid @RequestBody RequestDeal newRequestDeal) throws IOException, JSONException {
         return workWithDeal.saveTheDeal(newRequestDeal);
     }
 
     @PostMapping("/response")
-    public String responseCurrencyDeal(@RequestBody ResponseDeal newResponseDeal) throws IOException, JSONException {
+    public String responseCurrencyDeal(@RequestBody @Valid ResponseDeal newResponseDeal) throws IOException, JSONException {
         Map<String, String> checkStatusMap = workWithDeal.checkStatusDeal(newResponseDeal);
         String resultCheckOTP = null;
         if (!checkStatusMap.isEmpty()) {
@@ -49,7 +50,8 @@ public class CurrencyExchangeControllerImpl implements CurrencyExchangeControlle
     }
 
     @PostMapping("/delete")
-    public String deleteDeal(@RequestBody DeleteDeal newDeleteDeal) throws IOException, JSONException {
+    public String deleteDeal(@RequestBody @Valid DeleteDeal newDeleteDeal) throws IOException, JSONException {
+
         String response = null;
 
         if (workWithDeal.checkForRemove(newDeleteDeal)) {
@@ -66,7 +68,8 @@ public class CurrencyExchangeControllerImpl implements CurrencyExchangeControlle
     }
 
     @PostMapping("/report")
-    public List<Deal> reportForThePeriod(@RequestBody ReportDeal newReportDeal) throws IOException, JSONException, ParseException {
+    public List<Deal> reportForThePeriod(@RequestBody @Valid ReportDeal newReportDeal) throws IOException, JSONException, ParseException {
+
         List<Deal> report = workWithDeal.report(newReportDeal);
         return report;
     }

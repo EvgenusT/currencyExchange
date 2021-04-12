@@ -5,18 +5,16 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -59,6 +57,7 @@ public class DealRepositoryTest {
     public void shouldCheckRequestIsNotNull() {
         Assert.assertTrue(!(dealRepository.checkStatus("0504520369", "444444")).isEmpty());
     }
+
     @Test
     public void shouldCheckRequestIsNull() {
         Assert.assertTrue((dealRepository.checkStatus("0504520369", "222222222")).isEmpty());
@@ -80,6 +79,7 @@ public class DealRepositoryTest {
         int expectedResult = 1;
         Assert.assertEquals(expectedResult, actualResult);
     }
+
     @Test
     public void shouldCountDealsNotOk() {
         int actualResult = dealRepository.countDeals("USD", "buy");

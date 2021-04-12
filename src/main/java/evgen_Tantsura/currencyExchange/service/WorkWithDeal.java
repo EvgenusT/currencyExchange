@@ -3,7 +3,6 @@ package evgen_Tantsura.currencyExchange.service;
 import evgen_Tantsura.currencyExchange.entity.*;
 import evgen_Tantsura.currencyExchange.repository.*;
 import evgen_Tantsura.currencyExchange.utils.CONST;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,26 +16,26 @@ import java.util.Random;
 @Service
 public class WorkWithDeal {
 
-    @Autowired
-    ExchangeRatesRepository exchangeRatesRepository;
-
-    @Autowired
-    DealRepository dealRepository;
-
-    @Autowired
-    RequestDealRepository requestDealRepository;
-
-    @Autowired
-    ResponseDealRepository responseDealRepository;
-
-    @Autowired
-    DeleteDealRepository deleteDealRepository;
-
-    @Autowired
-    ReportDealRepository reportDealRepository;
+    private final ExchangeRatesRepository exchangeRatesRepository;
+    private final DealRepository dealRepository;
+    private final RequestDealRepository requestDealRepository;
+    private final ResponseDealRepository responseDealRepository;
+    private final DeleteDealRepository deleteDealRepository;
+    private final ReportDealRepository reportDealRepository;
 
     private StringBuffer sb = new StringBuffer();
     private String request = "";
+
+    public WorkWithDeal(ExchangeRatesRepository exchangeRatesRepository, DealRepository dealRepository,
+                        RequestDealRepository requestDealRepository, ResponseDealRepository responseDealRepository,
+                        DeleteDealRepository deleteDealRepository, ReportDealRepository reportDealRepository) {
+        this.exchangeRatesRepository = exchangeRatesRepository;
+        this.dealRepository = dealRepository;
+        this.requestDealRepository = requestDealRepository;
+        this.responseDealRepository = responseDealRepository;
+        this.deleteDealRepository = deleteDealRepository;
+        this.reportDealRepository = reportDealRepository;
+    }
 
     public String saveTheDeal(RequestDeal newRequestDeal) {
 
@@ -84,6 +83,7 @@ public class WorkWithDeal {
     }
 
     public void cancellationTheDeal(ResponseDeal newResponseDeal) {
+        responseDealRepository.save(newResponseDeal);
         dealRepository.cancellationStatus(CONST.REJECTED, newResponseDeal.getTel());
     }
 

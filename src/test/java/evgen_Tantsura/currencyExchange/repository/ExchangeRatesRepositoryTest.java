@@ -1,6 +1,5 @@
 package evgen_Tantsura.currencyExchange.repository;
 
-import evgen_Tantsura.currencyExchange.entity.ExchangeRates;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +15,7 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-@Sql(value = {"/create-exchangeRates-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(value = {"/create-exchangeRates-dateNow-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class ExchangeRatesRepositoryTest {
 
     @Autowired

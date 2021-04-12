@@ -13,6 +13,6 @@ public interface ExchangeRatesRepository extends JpaRepository<ExchangeRates, In
     ExchangeRates getTheCurrencyRate(String currency);
 
     @Query(value = "SELECT * FROM exchange_Rates WHERE ID = " +
-            "(SELECT max(ID) FROM exchange_Rates WHERE CCY = ?1 AND date_And_Time <= CURDATE())", nativeQuery = true)
+            "(SELECT max(ID) FROM exchange_Rates WHERE CCY = ?1 AND date_And_Time >= CURDATE())", nativeQuery = true)
     Map<String, Object> getTheRateByCurrency(String currency);
 }

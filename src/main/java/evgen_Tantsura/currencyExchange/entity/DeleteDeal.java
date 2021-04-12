@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 @Entity
 @Data
@@ -16,6 +18,8 @@ public class DeleteDeal {
 
     @Id
     private int id;
+    @NotEmpty(message = "поле должно быть заполнено")
+    @Size(min = 10, max = 10, message = "введите правильно номер телефона")
     @ApiModelProperty(value = "телефон клиента")
     private String tel;
 
